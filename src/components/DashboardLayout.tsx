@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import { 
   SidebarProvider, 
@@ -13,38 +13,39 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FileText, Home, Settings, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export function DashboardLayout() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const { user, profile, isLoading, signOut } = useAuth();
   
   useEffect(() => {
-    // Check if user is logged in
-    const userJson = localStorage.getItem("user");
-    
-    if (!userJson) {
-      navigate("/login");
-      return;
-    }
-    
-    try {
-      const userData = JSON.parse(userJson);
-      setUser(userData);
-    } catch (e) {
+    if (!isLoading && !user) {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [user, isLoading, navigate]);
   
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    toast.success("Logged out successfully");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully");
+    } catch (error) {
+      toast.error("Failed to log out");
+    }
   };
   
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-purple"></div>
+      </div>
+    );
+  }
+
   if (!user) {
     return null;
   }
@@ -120,12 +121,17 @@ export function DashboardLayout() {
           <div className="mt-auto border-t p-4">
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarFallback className="bg-brand-purple text-white">
-                  {user.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt={profile.username || user.email} />
+                ) : (
+                  <AvatarFallback className="bg-brand-purple text-white">
+                    {profile?.username ? profile.username.substring(0, 2).toUpperCase() : 
+                     user.email ? user.email.substring(0, 2).toUpperCase() : 'US'}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div className="overflow-hidden">
-                <p className="text-sm font-medium truncate">{user.name}</p>
+                <p className="text-sm font-medium truncate">{profile?.username || user.email}</p>
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
             </div>
