@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,7 +6,43 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
-const mockDocuments = [
+// Define document types
+type BaseDocument = {
+  id: string;
+  name: string;
+  type: string;
+  size: string;
+  date: string;
+  status: string;
+};
+
+type AnalyzedDocument = BaseDocument & {
+  status: 'Analyzed';
+  score: number;
+  issues: number;
+  progress?: never;
+  error?: never;
+};
+
+type AnalyzingDocument = BaseDocument & {
+  status: 'Analyzing';
+  progress: number;
+  score?: never;
+  issues?: never;
+  error?: never;
+};
+
+type FailedDocument = BaseDocument & {
+  status: 'Failed';
+  error: string;
+  progress?: never;
+  score?: never;
+  issues?: never;
+};
+
+type DocumentType = AnalyzedDocument | AnalyzingDocument | FailedDocument;
+
+const mockDocuments: DocumentType[] = [
   {
     id: '1',
     name: 'Business Proposal.docx',
@@ -15,8 +50,8 @@ const mockDocuments = [
     size: '1.2 MB',
     status: 'Analyzed',
     score: 85,
+    issues: 7,
     date: '2025-05-01',
-    issues: 7
   },
   {
     id: '2',
@@ -34,8 +69,8 @@ const mockDocuments = [
     size: '2.4 MB',
     status: 'Analyzed',
     score: 92,
+    issues: 3,
     date: '2025-05-08',
-    issues: 3
   },
   {
     id: '4',
@@ -44,8 +79,8 @@ const mockDocuments = [
     size: '3.8 MB',
     status: 'Analyzed',
     score: 78,
+    issues: 12,
     date: '2025-04-15',
-    issues: 12
   },
   {
     id: '5',
@@ -61,7 +96,7 @@ const mockDocuments = [
 const Documents = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [documents, setDocuments] = useState(mockDocuments);
+  const [documents, setDocuments] = useState<DocumentType[]>(mockDocuments);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   
@@ -88,7 +123,7 @@ const Documents = () => {
           clearInterval(interval);
           
           // Add a new document to the list
-          const newDocument = {
+          const newDocument: AnalyzingDocument = {
             id: String(documents.length + 1),
             name: "New Document.pdf",
             type: 'PDF',
@@ -117,7 +152,7 @@ const Documents = () => {
               setDocuments(prev => 
                 prev.map(doc => 
                   doc.id === newDocument.id 
-                    ? { ...doc, progress: analysisProgress }
+                    ? { ...doc, progress: analysisProgress } as AnalyzingDocument
                     : doc
                 )
               );
@@ -130,11 +165,15 @@ const Documents = () => {
                   prev.map(doc => 
                     doc.id === newDocument.id 
                       ? { 
-                          ...doc, 
-                          status: 'Analyzed', 
+                          id: doc.id,
+                          name: doc.name,
+                          type: doc.type,
+                          size: doc.size,
+                          date: doc.date,
+                          status: 'Analyzed',
                           score: Math.floor(Math.random() * 20) + 80,
                           issues: Math.floor(Math.random() * 10) + 1
-                        }
+                        } as AnalyzedDocument
                       : doc
                   )
                 );
@@ -264,7 +303,7 @@ const Documents = () => {
                           <div className={`w-2 h-2 rounded-full ${getStatusColor(doc.status)}`}></div>
                           <span>
                             {doc.status}
-                            {doc.status === 'Analyzed' && doc.score && (
+                            {doc.status === 'Analyzed' && (
                               <span className="ml-1 text-sm text-muted-foreground">
                                 ({doc.score}%)
                               </span>
