@@ -14,7 +14,7 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Home, Settings, User, LogOut } from "lucide-react";
+import { FileText, Home, Settings, User, LogOut, FilePlus, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -78,6 +78,22 @@ export function DashboardLayout() {
                       <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard/documents")}>
                         <FileText className="mr-2 h-4 w-4" />
                         <span>Documents</span>
+                      </Button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard/create-document")}>
+                        <FilePlus className="mr-2 h-4 w-4" />
+                        <span>Create Document</span>
+                      </Button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => navigate("/dashboard/errors-solution")}>
+                        <AlertCircle className="mr-2 h-4 w-4" />
+                        <span>Errors Solution</span>
                       </Button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

@@ -1,82 +1,56 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Upload, CheckCircle, X } from "lucide-react";
+import { FileText, Upload, CheckCircle, X, Plus, FileDown, FilePlus, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [recentDocuments, setRecentDocuments] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
-  useEffect(() => {
-    // Simulate API call to fetch recent documents
-    const fetchRecentDocuments = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockDocuments = [
-          {
-            id: '1',
-            name: 'Business Proposal.docx',
-            status: 'Analyzed',
-            score: 85,
-            date: '2025-05-01',
-            issues: 7
-          },
-          {
-            id: '2',
-            name: 'Meeting Notes.pdf',
-            status: 'Analyzing',
-            progress: 65,
-            date: '2025-05-09',
-          },
-          {
-            id: '3',
-            name: 'Product Roadmap.docx',
-            status: 'Analyzed',
-            score: 92,
-            date: '2025-05-08',
-            issues: 3
-          },
-        ];
-        
-        setRecentDocuments(mockDocuments);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load recent documents",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchRecentDocuments();
-  }, [toast]);
+  const handleCreateDocument = () => {
+    navigate("/dashboard/create-document");
+  };
   
-  const handleUpload = () => {
-    // In a real app, this would open a file picker
-    toast({
-      title: "Feature Coming Soon",
-      description: "Document upload functionality is being implemented",
-    });
+  const handleErrorsSolution = () => {
+    navigate("/dashboard/errors-solution");
   };
   
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Button onClick={handleUpload} className="bg-brand-purple hover:bg-brand-purple/90">
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Document
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => navigate("/dashboard/documents")} variant="outline" className="bg-gray-100">
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Document
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Create Document Button Card */}
+        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateDocument}>
+          <div className="bg-gradient-to-br from-brand-purple to-brand-blue p-6 flex flex-col items-center justify-center text-white aspect-video">
+            <FilePlus className="h-16 w-16 mb-4" />
+            <h2 className="text-2xl font-bold">Create Document</h2>
+            <p className="text-sm opacity-80 mt-2">Create and edit new documents</p>
+          </div>
+        </Card>
+        
+        {/* Errors Solution Button Card */}
+        <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={handleErrorsSolution}>
+          <div className="bg-gradient-to-br from-brand-blue to-cyan-500 p-6 flex flex-col items-center justify-center text-white aspect-video">
+            <AlertCircle className="h-16 w-16 mb-4" />
+            <h2 className="text-2xl font-bold">Errors Solution</h2>
+            <p className="text-sm opacity-80 mt-2">View and fix document issues</p>
+          </div>
+        </Card>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -85,7 +59,7 @@ const Dashboard = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Documents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">0</div>
           </CardContent>
         </Card>
         <Card>
@@ -93,7 +67,7 @@ const Dashboard = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Average Score</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">87%</div>
+            <div className="text-2xl font-bold">0%</div>
           </CardContent>
         </Card>
         <Card>
@@ -101,7 +75,7 @@ const Dashboard = () => {
             <CardTitle className="text-sm font-medium text-muted-foreground">Issues Fixed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">32</div>
+            <div className="text-2xl font-bold">0</div>
           </CardContent>
         </Card>
       </div>
@@ -121,39 +95,15 @@ const Dashboard = () => {
                   <FileText className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-medium mb-1">No documents yet</h3>
-                <p className="text-muted-foreground mb-4">Upload your first document to get started</p>
-                <Button onClick={handleUpload} variant="outline">Upload Document</Button>
+                <p className="text-muted-foreground mb-4">Upload your first document or create a new one</p>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={() => navigate("/dashboard/documents")} variant="outline">Upload Document</Button>
+                  <Button onClick={handleCreateDocument}>Create Document</Button>
+                </div>
               </div>
             ) : (
-              recentDocuments.map((doc) => (
-                <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-muted/20 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded bg-brand-light-purple flex items-center justify-center">
-                      <FileText className="h-5 w-5 text-brand-purple" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{doc.name}</p>
-                      <p className="text-xs text-muted-foreground">Uploaded on {new Date(doc.date).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {doc.status === 'Analyzing' ? (
-                      <div className="w-32">
-                        <p className="text-xs mb-1 text-muted-foreground">{doc.progress}% complete</p>
-                        <Progress value={doc.progress} className="h-1.5" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium">{doc.score}%</span>
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      </div>
-                    )}
-                    
-                    <Button variant="ghost" size="sm">View</Button>
-                  </div>
-                </div>
-              ))
+              // This will display documents when they're available
+              <div className="p-4 text-center text-muted-foreground">No documents found</div>
             )}
           </div>
         </Card>
@@ -177,8 +127,8 @@ const Dashboard = () => {
               </div>
               
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 bg-brand-light-purple text-brand-purple rounded-full p-1">
-                  <CheckCircle className="h-4 w-4" />
+                <div className="mt-0.5 bg-gray-100 text-gray-400 rounded-full p-1">
+                  <X className="h-4 w-4" />
                 </div>
                 <div>
                   <p className="font-medium">Upload first document</p>
@@ -201,8 +151,8 @@ const Dashboard = () => {
                   <X className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="font-medium">Explore AI features</p>
-                  <p className="text-sm text-muted-foreground">Try out all document analysis features</p>
+                  <p className="font-medium">Create your first document</p>
+                  <p className="text-sm text-muted-foreground">Use our editor to create a document</p>
                 </div>
               </div>
             </div>
@@ -218,33 +168,33 @@ const Dashboard = () => {
               <div>
                 <div className="flex justify-between mb-1 text-sm">
                   <span>Grammar Issues</span>
-                  <span className="font-medium">12</span>
+                  <span className="font-medium">0</span>
                 </div>
-                <Progress value={40} className="h-2" />
+                <Progress value={0} className="h-2" />
               </div>
               
               <div>
                 <div className="flex justify-between mb-1 text-sm">
                   <span>Formatting Inconsistencies</span>
-                  <span className="font-medium">8</span>
+                  <span className="font-medium">0</span>
                 </div>
-                <Progress value={25} className="h-2" />
+                <Progress value={0} className="h-2" />
               </div>
               
               <div>
                 <div className="flex justify-between mb-1 text-sm">
                   <span>Style Improvements</span>
-                  <span className="font-medium">15</span>
+                  <span className="font-medium">0</span>
                 </div>
-                <Progress value={50} className="h-2" />
+                <Progress value={0} className="h-2" />
               </div>
               
               <div>
                 <div className="flex justify-between mb-1 text-sm">
                   <span>Readability Score</span>
-                  <span className="font-medium">Good</span>
+                  <span className="font-medium">N/A</span>
                 </div>
-                <Progress value={75} className="h-2" />
+                <Progress value={0} className="h-2" />
               </div>
             </div>
           </CardContent>

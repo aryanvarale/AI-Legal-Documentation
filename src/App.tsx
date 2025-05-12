@@ -10,10 +10,12 @@ import Signup from "./pages/Signup";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
+import CreateDocument from "./pages/CreateDocument";
+import ErrorsSolution from "./pages/ErrorsSolution";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { AuthProvider } from "./contexts/AuthContext";
-import { Separator } from "./components/ui/separator";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +36,9 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="documents" element={<Documents />} />
-              <Route path="profile" element={<div>Profile page - Coming soon</div>} />
+              <Route path="create-document" element={<CreateDocument />} />
+              <Route path="errors-solution" element={<ErrorsSolution />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<div>Settings page - Coming soon</div>} />
             </Route>
             

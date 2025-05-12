@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,12 +78,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signIn({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error signing in:', error);
+      throw error;
+    }
+  };
+
+  const updateProfile = async (profileData: Partial<Profile>) => {
+    if (!user) throw new Error("Not authenticated");
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', user.id);
+      
+    if (error) throw error;
+    
+    // Update local profile state
+    setProfile(prev => prev ? { ...prev, ...profileData } : null);
+    
+    return data;
+  };
+
   const value = {
-    session,
     user,
     profile,
+    signUp,
+    signIn,
+    signOut,
     isLoading,
-    signOut
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
