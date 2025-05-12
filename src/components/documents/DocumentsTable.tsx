@@ -1,93 +1,162 @@
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
 import { DocumentType } from "@/types/document";
+import { FileText, AlertTriangle, CheckCircle, Clock, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-type DocumentsTableProps = {
+interface DocumentsTableProps {
   documents: DocumentType[];
   onViewDocument: (id: string) => void;
+  onDeleteDocument?: (id: string) => void;
 }
 
-export const DocumentsTable = ({ documents, onViewDocument }: DocumentsTableProps) => {
-  const getStatusColor = (status: string) => {
+export function DocumentsTable({ documents, onViewDocument, onDeleteDocument }: DocumentsTableProps) {
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'Analyzed':
-        return 'bg-green-500';
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'Analyzing':
-        return 'bg-blue-500';
+        return <Clock className="h-4 w-4 text-blue-500" />;
       case 'Failed':
-        return 'bg-red-500';
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
       default:
-        return 'bg-gray-500';
+        return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
   
+  const handleDelete = (id: string) => {
+    if (onDeleteDocument) {
+      setDocumentToDelete(id);
+    }
+  };
+  
+  const confirmDelete = () => {
+    if (documentToDelete && onDeleteDocument) {
+      onDeleteDocument(documentToDelete);
+      setDocumentToDelete(null);
+    }
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b">
-            <th className="text-left p-4 font-medium">Name</th>
-            <th className="text-left p-4 font-medium">Type</th>
-            <th className="text-left p-4 font-medium">Size</th>
-            <th className="text-left p-4 font-medium">Status</th>
-            <th className="text-left p-4 font-medium">Date</th>
-            <th className="text-left p-4 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {documents.map((doc) => (
-            <tr key={doc.id} className="hover:bg-muted/20">
-              <td className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded bg-brand-light-purple flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-brand-purple" />
-                  </div>
-                  <span className="font-medium">{doc.name}</span>
-                </div>
-              </td>
-              <td className="p-4 text-muted-foreground">{doc.type}</td>
-              <td className="p-4 text-muted-foreground">{doc.size}</td>
-              <td className="p-4">
-                {doc.status === 'Analyzing' ? (
-                  <div className="w-32">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className={`w-2 h-2 rounded-full bg-blue-500`}></div>
-                      <span className="text-sm">{doc.status}</span>
-                    </div>
-                    <Progress value={doc.progress} className="h-1.5" />
-                  </div>
-                ) : (
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">Document</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Size</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Score</TableHead>
+              <TableHead>Grammar</TableHead>
+              <TableHead>Formatting</TableHead>
+              <TableHead>Style</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {documents.map((document) => (
+              <TableRow key={document.id}>
+                <TableCell className="font-medium">{document.name}</TableCell>
+                <TableCell>{document.type}</TableCell>
+                <TableCell>{document.size}</TableCell>
+                <TableCell>{document.date}</TableCell>
+                <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${getStatusColor(doc.status)}`}></div>
-                    <span>
-                      {doc.status}
-                      {doc.status === 'Analyzed' && (
-                        <span className="ml-1 text-sm text-muted-foreground">
-                          ({doc.score}%)
-                        </span>
-                      )}
-                    </span>
+                    {getStatusIcon(document.status)}
+                    <span className="capitalize">{document.status}</span>
                   </div>
-                )}
-              </td>
-              <td className="p-4 text-muted-foreground">
-                {new Date(doc.date).toLocaleDateString()}
-              </td>
-              <td className="p-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onViewDocument(doc.id)}
-                >
-                  View
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                  {document.status === 'Analyzing' && (
+                    <Progress value={(document as any).progress} className="h-1 mt-2" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {document.status === 'Analyzed' ? 
+                    <span className={`font-medium ${(document as any).score >= 80 ? 'text-green-500' : (document as any).score >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                      {(document as any).score}/100
+                    </span> : 
+                    '-'
+                  }
+                </TableCell>
+                <TableCell>
+                  {document.status === 'Analyzed' ? 
+                    <span className="font-medium text-red-500">
+                      {(document as any).grammar_issues}
+                    </span> : 
+                    '-'
+                  }
+                </TableCell>
+                <TableCell>
+                  {document.status === 'Analyzed' ? 
+                    <span className="font-medium text-amber-500">
+                      {(document as any).formatting_issues}
+                    </span> : 
+                    '-'
+                  }
+                </TableCell>
+                <TableCell>
+                  {document.status === 'Analyzed' ? 
+                    <span className="font-medium text-blue-500">
+                      {(document as any).style_issues}
+                    </span> : 
+                    '-'
+                  }
+                </TableCell>
+                <TableCell className="text-right flex justify-end space-x-2">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => onViewDocument(document.id)}
+                    disabled={document.status === 'Analyzing'}
+                  >
+                    View
+                  </Button>
+                  {onDeleteDocument && (
+                    <Button 
+                      variant="ghost" 
+                      className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                      onClick={() => handleDelete(document.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      
+      <AlertDialog open={!!documentToDelete} onOpenChange={() => setDocumentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the document
+              and all its associated analysis data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
-};
+}
