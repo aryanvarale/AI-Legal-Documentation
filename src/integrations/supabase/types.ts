@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      document_analytics: {
+        Row: {
+          created_at: string
+          document_id: string
+          document_name: string
+          document_path: string
+          document_size: string
+          document_type: string
+          formatting_issues: number | null
+          grammar_issues: number | null
+          id: string
+          readability_score: string | null
+          score: number | null
+          status: string
+          style_issues: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          document_name: string
+          document_path: string
+          document_size: string
+          document_type: string
+          formatting_issues?: number | null
+          grammar_issues?: number | null
+          id?: string
+          readability_score?: string | null
+          score?: number | null
+          status?: string
+          style_issues?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          document_name?: string
+          document_path?: string
+          document_size?: string
+          document_type?: string
+          formatting_issues?: number | null
+          grammar_issues?: number | null
+          id?: string
+          readability_score?: string | null
+          score?: number | null
+          status?: string
+          style_issues?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -8,10 +8,56 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define interfaces for document types
+interface DocumentAnalytics {
+  id: string;
+  user_id: string;
+  document_id: string;
+  document_name: string;
+  document_path: string;
+  document_size: string;
+  document_type: string;
+  status: string;
+  grammar_issues?: number;
+  formatting_issues?: number;
+  style_issues?: number;
+  score?: number;
+  readability_score?: string;
+  created_at: string;
+}
+
 const ErrorsSolution = () => {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<DocumentAnalytics[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  
+  // Fetch user's documents on component mount
+  useEffect(() => {
+    if (user) {
+      fetchUserDocuments();
+    }
+  }, [user]);
+  
+  const fetchUserDocuments = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('document_analytics')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      if (data) {
+        setDocuments(data as DocumentAnalytics[]);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast.error("Failed to load your documents");
+    }
+  };
   
   const handleUpload = async () => {
     // Create file input element
@@ -26,7 +72,7 @@ const ErrorsSolution = () => {
       const file = target.files?.[0];
       
       if (!file || !user) {
-        if (!user) toast("Please sign in to upload documents");
+        if (!user) toast.error("Please sign in to upload documents");
         return;
       }
       
@@ -62,7 +108,7 @@ const ErrorsSolution = () => {
         
         // Update documents list
         if (analysisData) {
-          setDocuments(prev => [...prev, analysisData[0]]);
+          setDocuments(prev => [...prev, analysisData[0] as DocumentAnalytics]);
           
           // Simulate analysis completion (this would normally be done by a background process)
           setTimeout(() => {
@@ -182,7 +228,7 @@ const ErrorsSolution = () => {
                         <div className="mt-2 flex items-center">
                           <span className={`text-sm font-medium ${
                             doc.status === 'Completed' 
-                              ? doc.score >= 80 ? 'text-green-500' : 'text-amber-500'
+                              ? doc.score && doc.score >= 80 ? 'text-green-500' : 'text-amber-500'
                               : 'text-blue-500'
                           }`}>
                             {doc.status === 'Completed' 
