@@ -13,7 +13,7 @@ const LandingPage = () => {
             <div className="h-8 w-8 rounded-lg bg-brand-purple flex items-center justify-center">
               <FileText className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-xl">SleekScribe</span>
+            <span className="font-bold text-xl">DocumentDoctor</span>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/login" className="text-sm font-medium hover:text-brand-purple transition-colors">
@@ -51,7 +51,7 @@ const LandingPage = () => {
 
         <section className="py-20 bg-white">
           <div className="container mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center mb-12">How SleekScribe works</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">How DocumentDoctor works</h2>
             
             <div className="grid md:grid-cols-3 gap-8">
               <div className="bg-gray-50 p-6 rounded-xl">
@@ -118,10 +118,10 @@ const LandingPage = () => {
           <div className="container mx-auto px-6 text-center">
             <h2 className="text-3xl font-bold mb-6">Ready to perfect your documents?</h2>
             <p className="text-lg text-gray-700 mb-10 max-w-2xl mx-auto">
-              Join thousands of professionals who trust SleekScribe for their document review needs.
+              Join thousands of professionals who trust DocumentDoctor for their document review needs.
             </p>
             <Button asChild size="lg" className="bg-brand-purple hover:bg-brand-purple/90">
-              <Link to="/signup">Start using SleekScribe</Link>
+              <Link to="/signup">Start using DocumentDoctor</Link>
             </Button>
           </div>
         </section>
@@ -131,7 +131,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-semibold mb-4">SleekScribe</h3>
+              <h3 className="font-semibold mb-4">DocumentDoctor</h3>
               <ul className="space-y-2">
                 <li><Link to="/" className="text-gray-600 hover:text-gray-900 text-sm">Home</Link></li>
                 <li><Link to="/about" className="text-gray-600 hover:text-gray-900 text-sm">About</Link></li>
@@ -165,7 +165,7 @@ const LandingPage = () => {
           </div>
           <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-500 text-center">
-              &copy; {new Date().getFullYear()} SleekScribe. All rights reserved.
+              &copy; {new Date().getFullYear()} DocumentDoctor. All rights reserved.
             </p>
           </div>
         </div>

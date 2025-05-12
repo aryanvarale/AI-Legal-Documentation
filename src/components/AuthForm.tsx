@@ -89,7 +89,7 @@ export function AuthForm({ type }: AuthFormProps) {
               <div className="h-8 w-8 rounded-lg bg-brand-purple flex items-center justify-center">
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl">SleekScribe</span>
+              <span className="font-bold text-xl">DocumentDoctor</span>
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
