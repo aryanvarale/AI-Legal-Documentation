@@ -7,11 +7,11 @@ import { Filter, Upload, Search } from "lucide-react";
 import { formatFileSize } from "../utils/formatters";
 import { DocumentsTable } from "@/components/documents/DocumentsTable";
 import { extractTextFromFile, analyzeDocument } from "@/integrations/mistral/client";
-import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/documents/EmptyState";
 import { UploadProgress } from "@/components/documents/UploadProgress";
+import { apiRequest } from "@/utils/api";
 
 // Maximum file size - 25MB (increased from 5MB)
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
@@ -29,16 +29,9 @@ export default function Documents() {
   // Fetch all documents for the current user
   const fetchDocuments = useCallback(async () => {
     if (!user?.id) return;
-
     try {
       setLoading(true);
-      const { data: documents, error } = await (supabase as any)
-        .from("documents")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const documents = await apiRequest(`/documents?user_id=${user.id}`);
       setDocuments(documents || []);
     } catch (error: any) {
       console.error("Error fetching documents:", error.message);
@@ -173,29 +166,24 @@ export default function Documents() {
           return;
         }
         
-        // Create document record in 'analyzing' state
-        const { data: newDoc, error: insertError } = await (supabase as any)
-          .from('documents')
-          .insert({
+        // Create document via backend
+        const newDoc = await apiRequest(`/documents`, {
+          method: "POST",
+          body: JSON.stringify({
             user_id: user.id,
             name: file.name,
             type: file.type,
             size: `${(file.size / 1024).toFixed(2)} KB`,
-            status: 'Analyzing',
+            status: "Analyzing",
             progress: 0,
             content: fileText,
-            created_at: new Date().toISOString()
-          })
-          .select()
-          .single();
-          
-        if (insertError) throw insertError;
-        
-        const documentId = newDoc.id;
+            created_at: new Date().toISOString(),
+          }),
+        });
         
         // Add the document to the state
         const newDocumentState: any = {
-          id: documentId,
+          id: newDoc.id,
           name: file.name,
           type: file.type,
           size: `${(file.size / 1024).toFixed(2)} KB`,
@@ -214,14 +202,16 @@ export default function Documents() {
         setTimeout(async () => {
           try {
             // Update document progress
-            await (supabase as any)
-              .from('documents')
-              .update({ progress: 50 })
-              .eq('id', documentId);
-              
+            await apiRequest(`/documents/${newDoc.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({
+                progress: 50
+              }),
+            });
+            
             setDocuments(prev => 
               prev.map(doc => 
-                doc.id === documentId 
+                doc.id === newDoc.id 
                   ? { ...doc, progress: 50 } as any
                   : doc
               )
@@ -230,27 +220,25 @@ export default function Documents() {
             // Analyze document with Mistral API
             const analysis = await analyzeDocument(fileText);
             
-            // Update document with analysis results
-            const updatedDoc = {
-              status: 'Analyzed',
-              score: analysis.score,
-              grammar_issues: analysis.grammar_issues,
-              formatting_issues: analysis.formatting_issues,
-              style_issues: analysis.style_issues,
-              readability_score: analysis.readability_score,
-              progress: 100
-            };
+            // Update document with analysis results via backend
+            await apiRequest(`/documents/${newDoc.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({
+                status: "Analyzed",
+                score: analysis.score,
+                grammar_issues: analysis.grammar_issues,
+                formatting_issues: analysis.formatting_issues,
+                style_issues: analysis.style_issues,
+                readability_score: analysis.readability_score,
+                progress: 100
+              }),
+            });
             
-            await (supabase as any)
-              .from('documents')
-              .update(updatedDoc)
-              .eq('id', documentId);
-              
             // Save suggestions to the database
             if (analysis.suggestions && analysis.suggestions.length > 0) {
               // Format suggestions for database storage
               const suggestionsData = analysis.suggestions.map(suggestion => ({
-                document_id: documentId,
+                document_id: newDoc.id,
                 type: suggestion.type,
                 severity: suggestion.severity,
                 issue: suggestion.issue,
@@ -267,24 +255,26 @@ export default function Documents() {
                 // Insert in batches of 10 to avoid potential size limitations
                 for (let i = 0; i < suggestionsData.length; i += 10) {
                   const batch = suggestionsData.slice(i, i + 10);
-                  await (supabase as any)
-                    .from('document_suggestions')
-                    .insert(batch);
+                  await apiRequest(`/document_suggestions`, {
+                    method: "POST",
+                    body: JSON.stringify(batch),
+                  });
                 }
               } else {
                 // Insert all at once if fewer than 10 suggestions
-                await (supabase as any)
-                  .from('document_suggestions')
-                  .insert(suggestionsData);
+                await apiRequest(`/document_suggestions`, {
+                  method: "POST",
+                  body: JSON.stringify(suggestionsData),
+                });
               }
             }
             
             // Update local state
             setDocuments(prev => 
               prev.map(doc => 
-                doc.id === documentId 
+                doc.id === newDoc.id 
                   ? { 
-                      id: documentId,
+                      id: newDoc.id,
                       name: file.name,
                       type: file.type,
                       size: `${(file.size / 1024).toFixed(2)} KB`,
@@ -308,26 +298,26 @@ export default function Documents() {
             console.error("Error analyzing document:", error);
             
             // Update document as failed
-            await (supabase as any)
-              .from('documents')
-              .update({ 
-                status: 'Failed',
-                error: 'Failed to analyze document'
-              })
-              .eq('id', documentId);
-              
+            await apiRequest(`/documents/${newDoc.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({
+                status: "Failed",
+                error: "Failed to analyze document"
+              }),
+            });
+            
             // Update local state
             setDocuments(prev => 
               prev.map(doc => 
-                doc.id === documentId 
+                doc.id === newDoc.id 
                   ? { 
-                      id: documentId,
+                      id: newDoc.id,
                       name: file.name,
                       type: file.type,
                       size: `${(file.size / 1024).toFixed(2)} KB`,
                       date: new Date().toLocaleDateString(),
                       status: 'Failed',
-                      error: 'Failed to analyze document'
+                      error: "Failed to analyze document"
                     } as any
                   : doc
               )
@@ -340,6 +330,7 @@ export default function Documents() {
             });
           } finally {
             setUploading(false);
+            setUploadProgress(0);
           }
         }, 1000);
         
@@ -359,12 +350,9 @@ export default function Documents() {
 
   const handleDeleteDocument = async (documentId: string) => {
     try {
-      const { error } = await (supabase as any)
-        .from("documents")
-        .delete()
-        .eq("id", documentId);
-
-      if (error) throw error;
+      await apiRequest(`/documents/${documentId}`, {
+        method: "DELETE",
+      });
 
       // Update documents list
       setDocuments(documents.filter((doc: any) => doc.id !== documentId));
