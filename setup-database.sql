@@ -1,4 +1,4 @@
--- Step-by-step SQL script to set up the Sleek Scribe AI database
+-- Step-by-step SQL script to set up the Legal AI documentation database
 
 -- Step 1: Create the profiles table
 CREATE TABLE IF NOT EXISTS public.profiles (

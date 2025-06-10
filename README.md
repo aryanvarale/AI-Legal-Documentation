@@ -1,12 +1,12 @@
-# Sleek Scribe AI
+# Legal AI documentation
 
 A document analysis and improvement application that uses AI to enhance your writing.
 
-![Sleek Scribe AI Dashboard](https://example.com/screenshot.png)
+![Legal AI documentation Dashboard](https://example.com/screenshot.png)
 
 ## Overview
 
-Sleek Scribe AI is a powerful tool that helps users analyze and improve their documents. It uses Mistral AI to provide detailed analysis and suggestions for grammar, formatting, and style improvements.
+Legal AI documentation is a powerful tool that helps users analyze and improve their documents. It uses Mistral AI to provide detailed analysis and suggestions for grammar, formatting, and style improvements.
 
 ## Features
 
