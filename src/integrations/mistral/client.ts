@@ -12,8 +12,7 @@ try {
   pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 }
 
-const MISTRAL_API_KEY = import.meta.env.VITE_MISTRAL_API_KEY || 'jRuxrXPaXaoCLMEarL3mJQH9GaGDjuZJ';
-
+const MISTRAL_API_KEY = import.meta.env.VITE_MISTRAL_API_KEY;
 // Initialize Mistral client
 const mistralClient = new Mistral({
   apiKey: MISTRAL_API_KEY

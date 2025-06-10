@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://modpwbdbowhnabnloimn.supabase.co";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vZHB3YmRib3dobmFibmxvaW1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5NDU5NjgsImV4cCI6MjA2MjUyMTk2OH0.2fIEDEUDSbG3o0I389VzUGqbP3dGGdf4VpbtVhvfb10";
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
