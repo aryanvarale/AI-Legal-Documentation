@@ -2,7 +2,7 @@
 
 A document analysis and improvement application that uses AI to enhance your writing.
 
-![Legal AI documentation Dashboard](https://example.com/screenshot.png)
+![Legal AI documentation Dashboard](/public/ADL.png)
 
 ## Overview
 
